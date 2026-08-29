@@ -61,20 +61,18 @@ Future<void> playAzan() async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeFirebase();
-  tz.initializeTimeZones();
+ tz.initializeTimeZones();
   final iana = await _getPlatformTimeZone();
   if (iana != null) {
     try {
-      tz.setLocalLocation(tz.getLocation(iana));
-      debugPrint('tz.local set to $iana');
-    } catch (e) {
-      debugPrint('Failed to set tz.local from platform: $e');
-    }
+    await GoogleSignIn.instance.initialize();
+    debugPrint('GoogleSignIn initialized');
+  } catch (e) {
+    debugPrint('GoogleSignIn.initialize() failed: $e');
   }
 
   await NotificationService.initialize();
   runApp(const ZikrApp());
-}
 
 class ZikrApp extends StatefulWidget {
   const ZikrApp({super.key});
@@ -370,7 +368,7 @@ class NotificationService {
       debugPrint('cancel previous notification failed: $e');
     }
 
-    await _plugin.zonedSchedule(
+        await _plugin.zonedSchedule(
       id,
       title,
       body,
@@ -380,8 +378,11 @@ class NotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
       payload: payload != null ? jsonEncode(payload) : null,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      // v22+ parameter names / enums:
+      dateTimeInterpretation: DateTimeInterpretation.absolute,
+      // allowWhileIdle keeps behavior similar to previous inexactAllowWhileIdle
+      allowWhileIdle: true,
+      scheduleMode: ScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
     debugPrint('zonedSchedule requested for id=$id');
@@ -446,7 +447,8 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
 
   // Auth and billing helpers
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: const ['email', 'profile']);
+    // Use singleton instance for google_sign_in v7+
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   bool _billingAvailable = false;
   List<ProductDetails> _premiumProducts = const [];
@@ -723,14 +725,17 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final account = await _googleSignIn.signIn();
-      if (account == null) return; // user canceled
+          final account = await _googleSignIn.authenticate();
+          if (account == null) return; // user cancelled or no account selected
+
+      // For many cases `account.authentication` is still available to get tokens
       final auth = await account.authentication;
       final credential = GoogleAuthProvider.credential(
-        accessToken: auth.accessToken,
-        idToken: auth.idToken,
+      accessToken: auth.accessToken,
+      idToken: auth.idToken,
       );
       final result = await _auth.signInWithCredential(credential);
+
       final user = result.user;
       if (user != null) {
         setState(() {
