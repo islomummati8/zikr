@@ -76,7 +76,7 @@ Future<void> main() async {
   }
   
   try {
-    await GoogleSignIn.instance.initialize();
+    
     debugPrint('GoogleSignIn initialized');
   } catch (e) {
     debugPrint('GoogleSignIn.initialize() failed: $e');
@@ -381,9 +381,8 @@ class NotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
       payload: payload != null ? jsonEncode(payload) : null,
-      dateTimeInterpretation: DateTimeInterpretation.absolute,
-      allowWhileIdle: true,
-      scheduleMode: ScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle
       matchDateTimeComponents: DateTimeComponents.time,
     );
     debugPrint('zonedSchedule requested for id=$id');
@@ -439,7 +438,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
   Map<String, int> _plannedToday = {};
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   bool _billingAvailable = false;
   List<ProductDetails> _premiumProducts = const [];
