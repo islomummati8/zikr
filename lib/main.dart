@@ -372,19 +372,19 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduled,
-      NotificationDetails(
-        android: androidDetails,
-        iOS: const DarwinNotificationDetails(),
-      ),
-      payload: payload != null ? jsonEncode(payload) : null,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+  id,
+  title,
+  body,
+  scheduled,
+  NotificationDetails(
+    android: androidDetails,
+    iOS: const DarwinNotificationDetails(),
+  ),
+  payload: payload != null ? jsonEncode(payload) : null,
+  uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+  androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+  matchDateTimeComponents: DateTimeComponents.time,
+);
     debugPrint('zonedSchedule requested for id=$id');
   }
 
@@ -695,7 +695,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
 
   Future<void> _signInWithGoogle() async {
     try {
-      final account = await _googleSignIn.authenticate();
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
       if (account == null) return;
 
       final auth = await account.authentication;
