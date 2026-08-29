@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zikr — Privacy & Account Rules (EN / RU)</title>
+  <meta name="description" content="Bilingual Privacy Policy and account deletion instructions for Zikr app with Day/Night reading modes."/>
+  <style>
+    :root{
+      --bg:#f3f6f5; --card:#fff; --text:#163737; --muted:#5f7876; --accent:#1f6f67; --danger:#b00020;
+      --glass: rgba(255,255,255,0.7);
+    }
+    [data-theme='dark']{ --bg:#071718; --card:#071f1e; --text:#dff6f4; --muted:#9bc6c0; --accent:#6bd3c6; --glass: rgba(255,255,255,0.04) }
+
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,var(--bg),#ffffff);color:var(--text)}
+    .wrap{max-width:1100px;margin:28px auto;padding:22px}
+    .card{background:var(--card);border-radius:12px;padding:22px;box-shadow:0 10px 30px rgba(11,18,17,0.06);border:1px solid rgba(0,0,0,0.04)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;font-size:20px}
+    .meta{color:var(--muted);font-size:13px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .btn{border:1px solid rgba(0,0,0,0.06);background:var(--glass);color:var(--accent);padding:8px 12px;border-radius:9px;cursor:pointer;font-weight:700}
+    .btn.--primary{background:linear-gradient(180deg,var(--accent),#2b7e7a);color:white;border:0}
+    nav{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+    nav a{color:var(--accent);text-decoration:none;font-weight:600}
+    section{margin-top:18px}
+    h2{font-size:16px;margin:8px 0}
+    p,li{color:var(--text);line-height:1.6;font-size:15px}
+    ul{padding-left:18px}
+    .email{color:var(--accent);font-weight:700}
+    .box{background:linear-gradient(180deg, rgba(0,0,0,0.01), rgba(0,0,0,0.00));border-radius:10px;padding:12px;border:1px solid rgba(0,0,0,0.03);margin:14px 0}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--glass);font-weight:700}
+    pre{background:#f4f7f7;padding:12px;border-radius:8px;overflow:auto}
+    .delete{background:rgba(176,0,32,0.06);border-left:4px solid rgba(176,0,32,0.18);padding:12px;border-radius:8px}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    @media (max-width:720px){.wrap{padding:12px}}
+  </style>
+</head>
+<body data-theme="light">
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div>
+          <h1>Zikr — Privacy & Account Rules</h1>
+          <div class="meta">English / Русский • Last updated: 2026-08-27</div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="langEn">EN</button>
+          <button class="btn" id="langRu">RU</button>
+          <button class="btn" id="toggleTheme">Day / Night</button>
+        </div>
+      </header>
+
+      <nav>
+        <a href="#overview">Overview</a>
+        <a href="#data">Data</a>
+        <a href="#use">Use</a>
+        <a href="#third">Third parties</a>
+        <a href="#retention">Retention</a>
+        <a href="#rights">Your rights</a>
+        <a href="#delete">Delete account</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <!-- ENGLISH -->
+      <div id="en" style="display:block">
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>Zikr is a bilingual prayer & dhikr app designed to help you keep a consistent routine: accurate prayer times, scheduled Azan reminders, dhikr/tasbih counters, habits and analytics. This page explains what data the app uses, how it is stored, how to request deletion, and the rules we follow to protect your privacy.</p>
+        </section>
+
+        <section id="data">
+          <h2>Data we collect</h2>
+          <ul>
+            <li><strong>Optional account info (only if you sign-in):</strong> Google account email and display name — stored to enable cross-device sync and restore (explicit opt-in).</li>
+            <li><strong>Local app data (stored on your device):</strong> prayer_records, prayer_history, tiki/planned times, dhikr counts, tasbih list, habits, custom_times — saved locally using secure app storage (SharedPreferences / local files).</li>
+            <li><strong>Optional location:</strong> only if you enable location-based prayer times. The app will send approximate location (city) to a third-party prayer times API (e.g., AlAdhan) after asking for permission.</li>
+            <li><strong>Payments:</strong> purchases are processed by Google Play — we do not collect card details. Purchase receipts may be used to unlock Premium features and are processed by Google Play.</li>
+            <li><strong>Diagnostics / crash reports:</strong> anonymous crash/usage data only when enabled to help improve the app.</li>
+          </ul>
+        </section>
+
+        <section id="use">
+          <h2>How we use data</h2>
+          <p>Data is used to provide app features: schedule local notifications, compute and display prayer times, store your dhikr and habits, and, if you opted in, synchronize data across devices. We do not use collected data for advertising or sell personal data to third parties.</p>
+        </section>
+
+        <section id="third">
+          <h2>Third parties & SDKs</h2>
+          <p>The app integrates with or may use the following services:</p>
+          <ul>
+            <li>Google Play Billing (payments)</li>
+            <li>Firebase / Google Sign-In (optional auth & sync)</li>
+            <li>AlAdhan or similar prayer times API (optional)</li>
+            <li>flutter_local_notifications and tz (local scheduling)</li>
+          </ul>
+          <p>These third parties have their own privacy practices. We only send data to them when necessary and when you consent (e.g., enabling sync sends data to Firebase associated with your account).</p>
+        </section>
+
+        <section id="retention">
+          <h2>Data retention</h2>
+          <p>Local data remains on your device until you uninstall the app or clear app data. If you enable account sync, synchronized data remains until you request deletion. Purchase records are kept as required by Google Play policies.</p>
+        </section>
+
+        <section id="subscriptions">
+          <h2>Subscriptions & Billing</h2>
+          <p>Zikr offers Premium access via a subscription (managed through Google Play Billing). Subscription features (unlimited habits, extra tasbih slots, advanced analytics) are unlocked after purchase. Typical offers may include a free trial period (for example: 1 month free) — the trial converts to a paid subscription automatically unless cancelled before the trial ends.</p>
+          <h3>Auto-renewal</h3>
+          <p>Subscriptions purchased via Google Play auto-renew by default. To avoid future charges, cancel before the next billing date. Cancelling a subscription will stop future renewals but your Premium access usually remains active until the end of the current paid period.</p>
+          <h3>How to cancel (Google Play)</h3>
+          <ol>
+            <li>Open the Google Play Store app on your device.</li>
+            <li>Tap your profile icon (top-right) → Payments &amp; subscriptions → Subscriptions.</li>
+            <li>Find "Zikr" in the list and tap it → Cancel subscription → follow the prompts.</li>
+          </ol>
+          <p>Google's official help page for managing subscriptions: <a href="https://support.google.com/googleplay/answer/7018481" target="_blank" rel="noopener">Manage subscriptions on Google Play</a>.</p>
+          <h3>Restore purchases & support</h3>
+          <p>If you reinstall the app or install on another device with the same Google account, use the app's "Restore purchases" button (Profile → Restore purchases) or sign in with the same Google account and the app will restore entitlements. If restore fails, contact support: <a class="email" href="mailto:safemediaosupport@gmail.com">safemediaosupport@gmail.com</a> or <a class="email" href="mailto:ilmyolida77@gmail.com">ilmyolida77@gmail.com</a>.</p>
+          <h3>Refunds</h3>
+          <p>Refunds are handled by Google Play. If you need a refund, request it through Google Play Help: <a href="https://support.google.com/googleplay/answer/2479637" target="_blank" rel="noopener">Request a refund from Google Play</a>. We may assist with information about your purchase if needed.</p>
+        </section>
+
+        <section id="rights">
+          <h2>Your rights</h2>
+          <p>You control your data. Options include:</p>
+          <ul>
+            <li>Disable or sign out of account sync at any time in Profile &gt; Account.</li>
+            <li>Export / Backup your records (if Export implemented in app).</li>
+            <li>Request deletion of your synchronized data (see below).</li>
+          </ul>
+        </section>
+
+        <section id="delete">
+          <h2>Delete account & data (how to)</h2>
+          <p>To delete your synchronized account data (data stored in cloud via Google / Firebase) use one of these methods:</p>
+          <div class="box">
+            <ol>
+              <li>In-app: Profile / Account &gt; Delete account (if available). This will remove synced data associated with your Google account.</li>
+              <li>Email the support team requesting deletion. Send from the email that you used with the app and include the subject line exactly as shown below.</li>
+            </ol>
+            <p><strong>Support emails:</strong> <a class="email" href="mailto:safemediaosupport@gmail.com">safemediaosupport@gmail.com</a> or <a class="email" href="mailto:ilmyolida77@gmail.com">ilmyolida77@gmail.com</a></p>
+            <div style="margin-top:10px">
+              <strong>Email template (copy & paste):</strong>
+              <pre>Subject: Zikr — Account and data deletion request
+
+Hello,
+
+Please delete my Zikr account and all synchronized data for this email: your-email@example.com
+
+Thank you.</pre>
+            </div>
+          </div>
+          <p class="delete"><strong>Processing:</strong> Requests are normally processed within 7 business days. Local device data will not be removed automatically; uninstall the app or clear app data to remove local records.</p>
+        </section>
+
+        <section id="contact">
+          <h2>Contact & Gmail links</h2>
+          <p>Support email addresses (use one to contact us):</p>
+          <ul>
+            <li><a class="email" href="mailto:safemediaosupport@gmail.com">safemediaosupport@gmail.com</a></li>
+            <li><a class="email" href="mailto:ilmyolida77@gmail.com">ilmyolida77@gmail.com</a></li>
+          </ul>
+          <p>If you want to open Gmail web interface to send an email, use this link: <a href="https://mail.google.com/" target="_blank" rel="noopener">Open Gmail</a></p>
+          <p>If you were asking for an explanation or link for Google Sign-In integration (how users sign in using Gmail):</p>
+          <ul>
+            <li>Guide for developers: <a href="https://developers.google.com/identity/sign-in/android" target="_blank" rel="noopener">Google Sign-In (Android)</a></li>
+            <li>If Play App Signing is used, add Google Play App Signing SHA-1 to Firebase and download updated google-services.json before building a Play-signed bundle.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Display modes — Day & Night</h2>
+          <p>This page supports a Day (light) and Night (dark) viewing mode for comfortable reading on different screens. Use the top "Day / Night" control to switch. The app also supports light/dark themes for its UI — ensure readability when using dim screens (tungi chiroq mode) or bright daylight (kunduzgi chiroq mode).</p>
+        </section>
+
+        <footer>
+          <p>For legal compliance and Play Console: place a permanent HTTPS link to this page in Play Console → App content → Privacy policy.</p>
+        </footer>
+      </div>
+
+      <!-- RUSSIAN -->
+      <div id="ru" style="display:none">
+        <section>
+          <h2>Обзор</h2>
+          <p>Zikr — двуязычное приложение для намаза и зикра, которое помогает поддерживать рутину: точные времена намаза, напоминания (азан), счётчики зикра, привычки и аналитика. Здесь описано, какие данные используются, как они хранятся и как запросить удаление.</p>
+        </section>
+
+        <section>
+          <h2>Собираемые данные</h2>
+          <ul>
+            <li><strong>Опциональная информация аккаунта:</strong> email и имя аккаунта Google — сохраняются только при Вашем входе для синхронизации данных между устройствами.</li>
+            <li><strong>Локальные данные:</strong> записи намазов, счётчики зикра/тасбих, привычки, пользовательские времена — хранятся локально (SharedPreferences/файлы).</li>
+            <li><strong>Опционально — местоположение:</strong> если вы включите расчёт времени по местоположению, приложение пошлёт приблизительные данные (город) на API расчёта времён, например AlAdhan.</li>
+            <li><strong>Платежи:</strong> покупки обрабатываются Google Play — данные карт не поступают в приложение.</li>
+            <li><strong>Диагностика:</strong> анонимная статистика и краш-репорты при включении.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Как используются данные</h2>
+          <p>Данные используются для предоставления основных функций: планирование локальных уведомлений, расчёт и отображение времён намаза, сохранение привычек и счётчиков, и синхронизация при входе в аккаунт. Мы не продаём ваши личные данные.</p>
+        </section>
+
+        <section>
+          <h2>Сторонние сервисы</h2>
+          <p>Приложение может взаимодействовать со следующими сервисами:</p>
+          <ul>
+            <li>Google Play Billing</li>
+            <li>Firebase / Google Sign-In (опционально)</li>
+            <li>AlAdhan API (опционально)</li>
+            <li>flutter_local_notifications и tz</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Срок хранения</h2>
+          <p>Локальные данные хранятся на вашем устройстве до удаления приложения. Синхронизированные данные хранятся до вашего запроса на удаление.</p>
+        </section>
+
+        <section id="subscriptions-ru">
+          <h2>Подписки и оплата</h2>
+          <p>Zikr предлагает Premium по подписке через Google Play Billing. Подписка открывает дополнительные возможности (безлимитные привычки, дополнительные слоты тасбих, расширенная аналитика). Часто предлагается пробный период (например: 1 месяц бесплатно) — он автоматически переходит в платную подписку, если вы не отмените его до окончания пробного периода.</p>
+          <h3>Автопродление</h3>
+          <p>Подписки в Google Play по умолчанию автоматически продлеваются. Чтобы избежать списаний в будущем — отмените подписку до следующей даты платежа. Отмена прекращает будущие списания, но доступ к Premium обычно сохраняется до конца уже оплаченного периода.</p>
+          <h3>Как отменить (Google Play)</h3>
+          <ol>
+            <li>Откройте приложение Google Play на устройстве.</li>
+            <li>Нажмите на иконку профиля (вверху справа) → Платежи и подписки → Подписки.</li>
+            <li>Найдите «Zikr» и откройте → Отменить подписку → следуйте инструкциям.</li>
+          </ol>
+          <p>Официальная страница Google о подписках: <a href="https://support.google.com/googleplay/answer/7018481" target="_blank" rel="noopener">Управление подписками на Google Play</a>.</p>
+          <h3>Восстановление покупок и поддержка</h3>
+          <p>Если вы переустановили приложение или установили на другом устройстве с тем же Google-аккаунтом, используйте кнопку «Восстановить покупки» в приложении (Профиль → Восстановить покупки) или войдите в тот же аккаунт — приложение попытается восстановить права. Если восстановление не сработало, напишите в поддержку: <a class="email" href="mailto:safemediaosupport@gmail.com">safemediaosupport@gmail.com</a> или <a class="email" href="mailto:ilmyolida77@gmail.com">ilmyolida77@gmail.com</a>.</p>
+          <h3>Возвраты</h3>
+          <p>Возвраты обрабатываются Google Play. Чтобы запросить возврат, обратитесь в справку Google Play: <a href="https://support.google.com/googleplay/answer/2479637" target="_blank" rel="noopener">Запрос на возврат в Google Play</a>. Мы можем помочь информацией о покупке при необходимости.</p>
+        </section>
+
+        <section>
+          <h2>Ваши права</h2>
+          <p>Вы можете отключить синхронизацию, экспортировать данные (если функция есть) или запросить удаление аккаунта.</p>
+        </section>
+
+        <section>
+          <h2>Удаление аккаунта</h2>
+          <div class="box">
+            <p>Для удаления синхронизированных данных используйте:</p>
+            <ol>
+              <li>В приложении: Профиль → Удалить аккаунт (если доступно).</li>
+              <li>Или отправьте письмо на нашу поддержку (с почты, которой вы пользовались в приложении):</li>
+            </ol>
+            <p><strong>Почта поддержки:</strong> <a class="email" href="mailto:safemediaosupport@gmail.com">safemediaosupport@gmail.com</a> или <a class="email" href="mailto:ilmyolida77@gmail.com">ilmyolida77@gmail.com</a></p>
+            <pre>Тема: Zikr — запрос на удаление аккаунта и данных
+
+Здравствуйте,
+
+Прошу удалить мой аккаунт Zikr и все связанные синхронизированные данные для почты: your-email@example.com
+
+Спасибо.</pre>
+          </div>
+          <p class="delete">Обработка запроса обычно занимает до 7 рабочих дней. Локальные данные удаляются вручную (удалите приложение или очистите данные приложения).</p>
+        </section>
+
+        <section>
+          <h2>Контакты и Gmail</h2>
+          <p>Откройте Gmail: <a href="https://mail.google.com/" target="_blank">mail.google.com</a> или напишите на нашу почту:</p>
+          <ul>
+            <li><a class="email" href="mailto:safemediaosupport@gmail.com">safemediaosupport@gmail.com</a></li>
+            <li><a class="email" href="mailto:ilmyolida77@gmail.com">ilmyolida77@gmail.com</a></li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Дневной и ночной режимы</h2>
+          <p>Эта страница поддерживает дневной (светлый) и ночной (тёмный) режимы чтения — используйте кнопку вверху для переключения. В приложении также предусмотрены светлая/тёмная темы для удобства при использовании ночью или днём.</p>
+        </section>
+
+        <footer>
+          <p>Ссылка для Play Console: добавьте HTTPS URL этой страницы в "Privacy policy" при публикации приложения.</p>
+        </footer>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Basic UI: language toggle and theme toggle
+    const en = document.getElementById('en');
+    const ru = document.getElementById('ru');
+    const langEn = document.getElementById('langEn');
+    const langRu = document.getElementById('langRu');
+    const body = document.body;
+    const themeBtn = document.getElementById('toggleTheme');
+
+    function showEN(){ en.style.display='block'; ru.style.display='none'; langEn.classList.add('--primary'); langRu.classList.remove('--primary'); }
+    function showRU(){ en.style.display='none'; ru.style.display='block'; langRu.classList.add('--primary'); langEn.classList.remove('--primary'); }
+
+    langEn.addEventListener('click', ()=>{ showEN(); });
+    langRu.addEventListener('click', ()=>{ showRU(); });
+
+    // Theme toggle: day <-> night
+    themeBtn.addEventListener('click', ()=>{
+      const cur = document.body.getAttribute('data-theme') || 'light';
+      const next = cur === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', next);
+      themeBtn.innerText = next === 'light' ? 'Day / Night' : 'Day / Night';
+    });
+
+    // Initialize based on browser language
+    (function(){
+      const userLang = (navigator.language||'en').toLowerCase();
+      if(userLang.startsWith('ru')) showRU(); else showEN();
+      // prefer system dark mode
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if(prefersDark) document.body.setAttribute('data-theme','dark');
+    })();
+  </script>
+</body>
+</html>
