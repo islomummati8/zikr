@@ -1,3 +1,6 @@
+
+
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
@@ -50,7 +53,6 @@ final AudioPlayer _audioPlayer = AudioPlayer();
 
 Future<void> playAzan() async {
   try {
-    // Asset path is declared in pubspec: assets/audio/Adhan-Egypt.mp3
     await _audioPlayer.stop();
     await _audioPlayer.play(AssetSource('audio/Adhan-Egypt.mp3'));
   } catch (e) {
@@ -58,13 +60,22 @@ Future<void> playAzan() async {
   }
 }
 
+// ====== TUZATILGAN main() FUNKSIYASI ======
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeFirebase();
- tz.initializeTimeZones();
+  tz.initializeTimeZones();
+  
   final iana = await _getPlatformTimeZone();
   if (iana != null) {
     try {
+      tz.setLocalLocation(tz.getLocation(iana));
+    } catch (e) {
+      debugPrint('Failed to set timezone: $e');
+    }
+  }
+  
+  try {
     await GoogleSignIn.instance.initialize();
     debugPrint('GoogleSignIn initialized');
   } catch (e) {
@@ -73,16 +84,13 @@ Future<void> main() async {
 
   await NotificationService.initialize();
   runApp(const ZikrApp());
+} // <- BU YOPISH QAVSI MUHIM!
 
 class ZikrApp extends StatefulWidget {
   const ZikrApp({super.key});
 
   @override
   State<ZikrApp> createState() => _ZikrAppState();
-}
-
-class MyApp extends ZikrApp {
-  const MyApp({super.key});
 }
 
 class _ZikrAppState extends State<ZikrApp> {
@@ -158,23 +166,24 @@ class HabitItem {
   String frequency;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'subtitle': subtitle,
-        'done': done,
-        'minutes': minutes,
-        'time': time,
-        'frequency': frequency,
-      };
+    'id': id,
+    'title': title,
+    'subtitle': subtitle,
+    'done': done,
+    'minutes': minutes,
+    'time': time,
+    'frequency': frequency,
+  };
+  
   factory HabitItem.fromJson(Map<String, dynamic> map) => HabitItem(
-        id: map['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        title: map['title'] ?? 'Habit',
-        subtitle: map['subtitle'] ?? '',
-        done: map['done'] ?? false,
-        minutes: map['minutes'] is num ? (map['minutes'] as num).toInt() : 15,
-        time: map['time']?.toString() ?? '08:00',
-        frequency: map['frequency']?.toString() ?? 'Daily',
-      );
+    id: map['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+    title: map['title'] ?? 'Habit',
+    subtitle: map['subtitle'] ?? '',
+    done: map['done'] ?? false,
+    minutes: map['minutes'] is num ? (map['minutes'] as num).toInt() : 15,
+    time: map['time']?.toString() ?? '08:00',
+    frequency: map['frequency']?.toString() ?? 'Daily',
+  );
 }
 
 class TasbihCounter {
@@ -185,12 +194,13 @@ class TasbihCounter {
   int target;
 
   Map<String, dynamic> toJson() => {'id': id, 'name': name, 'count': count, 'target': target};
+  
   factory TasbihCounter.fromJson(Map<String, dynamic> map) => TasbihCounter(
-        id: map['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        name: map['name'] ?? 'Tasbih',
-        count: map['count'] ?? 0,
-        target: map['target'] ?? 33,
-      );
+    id: map['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+    name: map['name'] ?? 'Tasbih',
+    count: map['count'] ?? 0,
+    target: map['target'] ?? 33,
+  );
 }
 
 class PrayerData {
@@ -225,15 +235,15 @@ class PrayerData {
   }
 
   static PrayerData fallback() => PrayerData(
-        times: {
-          'Fajr': '04:15',
-          'Dhuhr': '12:35',
-          'Asr': '16:42',
-          'Maghrib': '19:25',
-          'Isha': '20:56',
-        },
-        location: 'Tashkent, Uzbekistan',
-      );
+    times: {
+      'Fajr': '04:15',
+      'Dhuhr': '12:35',
+      'Asr': '16:42',
+      'Maghrib': '19:25',
+      'Isha': '20:56',
+    },
+    location: 'Tashkent, Uzbekistan',
+  );
 
   Map<String, String> effectiveTimes(Map<String, String>? customTimes) {
     final effective = Map<String, String>.from(times);
@@ -269,7 +279,6 @@ class PrayerData {
     return '$nextName $nextTime';
   }
 }
-
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
 
@@ -278,24 +287,20 @@ class NotificationService {
     if (Platform.isAndroid) {
       await androidPlugin?.requestNotificationsPermission();
 
-      // If channels may exist from a previous install with different settings, delete them first to ensure
-      // the new channel configuration (sound, importance) takes effect.
       try {
         await androidPlugin?.deleteNotificationChannel('zikr_azan');
         await androidPlugin?.deleteNotificationChannel('zikr_notifications');
         debugPrint('Deleted old notification channels (if any)');
       } catch (e) {
-        // Not fatal; continue to (re)create channels
         debugPrint('deleteNotificationChannel warning: $e');
       }
 
-      // Create dedicated channels: one for azan (with custom raw sound) and one default channel.
       final azanChannel = AndroidNotificationChannel(
         'zikr_azan',
         'Zikr Azan',
         description: 'Azan notifications with adhan sound',
         importance: Importance.max,
-        sound: RawResourceAndroidNotificationSound('adhan'),
+        sound: const RawResourceAndroidNotificationSound('adhan'),
         playSound: true,
       );
 
@@ -336,7 +341,6 @@ class NotificationService {
     }
   }
 
-
   static int _idFor(String title, String time) => title.hashCode + time.hashCode;
 
   static Future<void> scheduleDaily({required String title, required String body, required String time, Map<String, String>? payload}) async {
@@ -355,11 +359,10 @@ class NotificationService {
       channelDescription: 'Daily prayer and routine reminders',
       importance: Importance.max,
       priority: Priority.high,
-      sound: wantsAzan ? RawResourceAndroidNotificationSound('adhan') : null,
+      sound: wantsAzan ? const RawResourceAndroidNotificationSound('adhan') : null,
       playSound: wantsAzan,
     );
 
-    // Ensure previous schedule with same id is removed to avoid duplicates
     final id = _idFor(title, time);
     try {
       debugPrint('Notification schedule: id=$id title="$title" time=$time wantsAzan=$wantsAzan channel=$channelId scheduled=$scheduled');
@@ -368,7 +371,7 @@ class NotificationService {
       debugPrint('cancel previous notification failed: $e');
     }
 
-        await _plugin.zonedSchedule(
+    await _plugin.zonedSchedule(
       id,
       title,
       body,
@@ -378,9 +381,7 @@ class NotificationService {
         iOS: const DarwinNotificationDetails(),
       ),
       payload: payload != null ? jsonEncode(payload) : null,
-      // v22+ parameter names / enums:
       dateTimeInterpretation: DateTimeInterpretation.absolute,
-      // allowWhileIdle keeps behavior similar to previous inexactAllowWhileIdle
       allowWhileIdle: true,
       scheduleMode: ScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -423,31 +424,21 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     TasbihCounter(id: '4', name: 'Salawat', count: 0, target: 33),
     TasbihCounter(id: '5', name: 'Istighfar', count: 0, target: 33),
   ];
-  String? _selectedTasbihId; // id of the tasbih shown at top (only one free visible by default)
-
+  String? _selectedTasbihId;
 
   Map<String, int> _prayerHistory = {'Fajr': 3, 'Dhuhr': 4, 'Asr': 2, 'Maghrib': 5, 'Isha': 4};
   Map<String, int> _timeSpent = {'Fajr': 12, 'Dhuhr': 18, 'Asr': 14, 'Maghrib': 10, 'Isha': 15};
 
-  // Per-day detailed prayer records: { '2026-08-26': { 'Fajr': {done:true, timeMinutes:8, reason:'Quick 5', timestamp:...}, ... }, ... }
-  Map<String, Map<String, Map<String, dynamic>>> _prayerRecords = {}; // persisted as 'prayer_records'
-
-  // Active timers: stores start timestamp millis for a prayer currently being timed
+  Map<String, Map<String, Map<String, dynamic>>> _prayerRecords = {};
   Map<String, int?> _activeTimerStarts = {};
-
-  // Analytics range in days for premium detailed view
   int _analyticsRangeDays = 7;
 
-  // Per-prayer settings: notify and azan and custom times
   Map<String, bool> _notifyEnabled = {'Fajr': true, 'Dhuhr': true, 'Asr': true, 'Maghrib': true, 'Isha': true};
   Map<String, bool> _azanEnabled = {'Fajr': false, 'Dhuhr': false, 'Asr': false, 'Maghrib': false, 'Isha': false};
-  Map<String, String> _customTimes = {}; // e.g. {'Fajr': '04:20'}
-  // Planned minutes for today per prayer (date-agnostic simple store for today's plans)
-  Map<String, int> _plannedToday = {}; // e.g. {'Fajr': 10}
+  Map<String, String> _customTimes = {};
+  Map<String, int> _plannedToday = {};
 
-  // Auth and billing helpers
   final FirebaseAuth _auth = FirebaseAuth.instance;
-    // Use singleton instance for google_sign_in v7+
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   bool _billingAvailable = false;
@@ -471,7 +462,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     final habitsJson = _prefs.getStringList('habits') ?? const [];
     final tasbihJson = _prefs.getStringList('tasbih') ?? const [];
 
-    // load saved prayer analytics
     try {
       final hist = _prefs.getString('prayer_history');
       if (hist != null) {
@@ -487,7 +477,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       }
     } catch (_) {}
 
-    // load detailed per-day prayer records (new feature)
     try {
       final rec = _prefs.getString('prayer_records');
       if (rec != null) {
@@ -505,7 +494,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       }
     } catch (_) {}
 
-    // load active timers so they survive app restart
     try {
       final at = _prefs.getString('active_timers');
       if (at != null) {
@@ -514,7 +502,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       }
     } catch (_) {}
 
-    // load per-prayer settings
     try {
       final n = _prefs.getString('notify_settings');
       if (n != null) {
@@ -536,7 +523,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
         _customTimes = m.map((k, v) => MapEntry(k.toString(), v.toString()));
       }
     } catch (_) {}
-    // load today's planned minutes (keyed by date to support per-day plans)
     try {
       final today = DateTime.now();
       final dateKey = '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
@@ -562,7 +548,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       } catch (_) {}
     }
     if (loadedTasbih.isNotEmpty) _tasbihs = loadedTasbih;
-    // restore previously selected tasbih if present
     final sel = _prefs.getString('selected_tasbih');
     if (sel != null && _tasbihs.any((t) => t.id == sel)) {
       _selectedTasbihId = sel;
@@ -583,7 +568,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) => _showPremiumDialog());
     }
 
-    // After loading saved settings, reschedule notifications once
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _rescheduleAllPrayerNotifications();
     });
@@ -613,28 +597,24 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     await _prefs.setStringList('tasbih', _tasbihs.map((e) => jsonEncode(e.toJson())).toList());
     if (_selectedTasbihId != null) await _prefs.setString('selected_tasbih', _selectedTasbihId!);
 
-    // save analytics and per-prayer settings
     await _prefs.setString('prayer_history', jsonEncode(_prayerHistory));
     await _prefs.setString('time_spent', jsonEncode(_timeSpent));
     await _prefs.setString('notify_settings', jsonEncode(_notifyEnabled));
     await _prefs.setString('azan_settings', jsonEncode(_azanEnabled));
     await _prefs.setString('custom_times', jsonEncode(_customTimes));
 
-    // persist detailed records
     try {
       await _prefs.setString('prayer_records', jsonEncode(_prayerRecords));
     } catch (e) {
       debugPrint('Failed to save prayer_records: $e');
     }
 
-    // persist active timers so they resume after restart
     try {
       await _prefs.setString('active_timers', jsonEncode(_activeTimerStarts));
     } catch (e) {
       debugPrint('Failed to save active_timers: $e');
     }
 
-    // persist today's planned minutes (keyed by date)
     try {
       final today = DateTime.now();
       final dateKey = '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
@@ -643,11 +623,9 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       debugPrint('Failed to save planned_today: $e');
     }
   }
-
-  Future<void> _rescheduleAllPrayerNotifications() async {
+    Future<void> _rescheduleAllPrayerNotifications() async {
     try {
       final engKeys = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-      // Capture localized labels before awaiting to avoid using BuildContext across async gaps
       final localizedMap = <String, String>{};
       for (final eng in engKeys) {
         localizedMap[eng] = AppStrings.text(context, eng.toLowerCase());
@@ -661,7 +639,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
         final effectiveTime = _customTimes[eng] ?? _customTimes[localized] ?? (data.times[eng] ?? '00:00');
         final notifyOn = _notifyEnabled[eng] ?? _notifyEnabled[localized] ?? false;
         final azanOn = _azanEnabled[eng] ?? _azanEnabled[localized] ?? false;
-        // Cancel any previous and schedule if needed
         await NotificationService.cancelScheduled(localized, effectiveTime);
         if (notifyOn) {
           await NotificationService.scheduleDaily(title: localized, body: '$nextPrayerLabel: $effectiveTime', time: effectiveTime, payload: {'azan': azanOn ? '1' : '0'});
@@ -672,9 +649,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     }
   }
 
-  // --- Authentication and Billing ---
   Future<void> _initAuthAndBilling() async {
-    // Listen for Firebase auth state changes
     _auth.authStateChanges().listen((user) async {
       if (user != null) {
         setState(() {
@@ -685,8 +660,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       }
     });
 
-    // Try to silently restore previously signed-in Google account so the app
-    // keeps the same Google user across restarts. This does not affect manual sign-in.
     try {
       final silent = await _googleSignIn.signInSilently();
       if (silent != null) {
@@ -698,7 +671,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
             idToken: auth.idToken,
           );
           await _auth.signInWithCredential(credential);
-          // authStateChanges listener will save state when user is non-null
         } catch (e) {
           debugPrint('Silent sign-in to Firebase failed: $e');
         }
@@ -707,7 +679,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       debugPrint('GoogleSignIn.signInSilently() threw: $e');
     }
 
-    // Initialize in-app purchases
     try {
       _billingAvailable = await _inAppPurchase.isAvailable();
       if (_billingAvailable) {
@@ -719,20 +690,19 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
         _purchaseSubscription = _inAppPurchase.purchaseStream.listen(_handlePurchaseUpdates, onError: (e) {});
       }
     } catch (e) {
-      // ignore billing init errors — will surface in logs
+      // ignore
     }
   }
 
   Future<void> _signInWithGoogle() async {
     try {
-          final account = await _googleSignIn.authenticate();
-          if (account == null) return; // user cancelled or no account selected
+      final account = await _googleSignIn.authenticate();
+      if (account == null) return;
 
-      // For many cases `account.authentication` is still available to get tokens
       final auth = await account.authentication;
       final credential = GoogleAuthProvider.credential(
-      accessToken: auth.accessToken,
-      idToken: auth.idToken,
+        accessToken: auth.accessToken,
+        idToken: auth.idToken,
       );
       final result = await _auth.signInWithCredential(credential);
 
@@ -745,13 +715,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
         await _saveState();
       }
     } on PlatformException catch (e) {
-      // Detailed diagnostics for easier troubleshooting without changing existing behavior
       debugPrint('Google sign-in failed (PlatformException): $e');
-      debugPrint('PlatformException.code: ${e.code}');
-      debugPrint('PlatformException.message: ${e.message}');
-      debugPrint('PlatformException.details: ${e.details}');
-
-      // Show a dialog with the error code/message so the user can copy it for support
       if (mounted) {
         showDialog<void>(
           context: context,
@@ -774,11 +738,8 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
           ),
         );
       }
-
-      // Keep showing a SnackBar for other UI feedback
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign-in failed: ${e.message ?? e}')));
     } catch (e) {
-      // fallback catch
       debugPrint('Google sign-in failed: $e');
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign-in failed: $e')));
     }
@@ -802,7 +763,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
   void _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
       if (purchase.status == PurchaseStatus.purchased || purchase.status == PurchaseStatus.restored) {
-        // For production, verify purchase.serverVerificationData with your backend / platform APIs
         setState(() {
           _premiumUnlocked = true;
         });
@@ -819,8 +779,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     final purchaseParam = PurchaseParam(productDetails: product);
     await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
   }
-
-  // --- end auth/billing ---
 
   Future<void> _showProfileDialog() async {
     final nameController = TextEditingController(text: _userName);
@@ -1022,9 +980,8 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       );
     }
   }
-
-  void _showPremiumDialog() {
-    if (_premiumUnlocked) return; // don't show to already subscribed users
+    void _showPremiumDialog() {
+    if (_premiumUnlocked) return;
     showDialog<void>(
       context: context,
       barrierDismissible: true,
@@ -1087,7 +1044,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF173B3F)),
                                 ),
                                 const SizedBox(height: 6),
-                                // Badge: 1 month free
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                   decoration: BoxDecoration(color: const Color(0xFFFFF2D9), borderRadius: BorderRadius.circular(999)),
@@ -1109,13 +1065,10 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                         style: const TextStyle(color: Color(0xFF708383), height: 1.5),
                       ),
                       const SizedBox(height: 14),
-
-                      // Page-like horizontal preview: PageView with dots indicator
                       SizedBox(
                         height: maxH - 300,
                         child: _PremiumPreviewPager(locale: widget.locale, premiumProducts: _premiumProducts, onBuy: _buyProduct, onProfile: _showProfileDialog),
                       ),
-
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
@@ -1145,16 +1098,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     );
   }
 
-  // Small reusable pager widget used inside the dialog. Kept as a private StatelessWidget to keep this file tidy.
-  // It presents a PageView with three preview pages and a dots indicator. It is self-contained and does not require
-  // additional state from the parent beyond callbacks for purchase/profile actions.
-  
-  // Note: placing this widget inside the State class file scope (but outside the state) keeps access to the same imports
-  // while keeping the _showPremiumDialog method concise.
-  
-  // The edit below injects the widget declaration into the file as part of the same edit operation.
-  
-  
   Widget _buildPagerPage({required IconData icon, required String title, required String subtitle, required Widget content}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1169,8 +1112,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     );
   }
 
-  // Inline pager widget used only by _showPremiumDialog. Implemented as a StatefulBuilder-friendly widget by using
-  // PageView and ValueNotifier for the current page index.
   Widget _PremiumPreviewPager({required Locale locale, required List<ProductDetails> premiumProducts, required Future<void> Function(String) onBuy, required VoidCallback onProfile}) {
     final controller = PageController();
     final pageIndex = ValueNotifier<int>(0);
@@ -1186,7 +1127,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
           child: PageView(
             controller: controller,
             children: [
-              // Page 1: Features overview
               _buildPagerPage(
                 icon: Icons.auto_awesome_rounded,
                 title: locale.languageCode == 'en' ? 'What you get' : 'Что входит',
@@ -1202,16 +1142,12 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                   ],
                 ),
               ),
-
-              // Page 2: Analytics preview
               _buildPagerPage(
                 icon: Icons.bar_chart_rounded,
                 title: locale.languageCode == 'en' ? 'Analytics' : 'Аналитика',
                 subtitle: locale.languageCode == 'en' ? 'See trends, time breakdowns and detailed history.' : 'Смотрите тренды, разбивку времени и подробную историю.',
                 content: Center(child: SizedBox(width: double.infinity, child: Card(elevation: 0, child: SizedBox(height: 220, child: _analyticsPreviewMock())))),
               ),
-
-              // Page 3: Reminders & Dhikr preview
               _buildPagerPage(
                 icon: Icons.notifications_active_rounded,
                 title: locale.languageCode == 'en' ? 'Reminders & Dhikr' : 'Напоминания и зикр',
@@ -1233,7 +1169,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
           ),
         ),
         const SizedBox(height: 12),
-        // Dots indicator
         ValueListenableBuilder<int>(
           valueListenable: pageIndex,
           builder: (ctx, idx, _) {
@@ -1373,8 +1308,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       ),
     );
   }
-
-  Future<void> _recordPrayer(String name, int minutes, String reason) async {
+    Future<void> _recordPrayer(String name, int minutes, String reason) async {
     final today = DateTime.now();
     final dateKey = '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
     setState(() {
@@ -1392,26 +1326,21 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     await _saveState();
   }
 
-  // ignore: unused_element
   void _startTimer(String name) {
     setState(() {
       _activeTimerStarts[name] = DateTime.now().millisecondsSinceEpoch;
     });
-    // persist immediately so restart keeps timers
     _saveState();
   }
 
-  // ignore: unused_element
   Future<void> _stopTimer(String name) async {
     final startMs = _activeTimerStarts[name];
     if (startMs == null) return;
     final now = DateTime.now().millisecondsSinceEpoch;
     final minutes = ((now - startMs) / 60000).round();
     setState(() => _activeTimerStarts.remove(name));
-    // persist removal
     await _saveState();
 
-    // Ask user to confirm reason / adjust minutes before saving
     int adjustMinutes = minutes.clamp(1, 999);
     String reason = 'Timer';
     if (!mounted) return;
@@ -1431,7 +1360,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                 TextField(controller: minutesCtl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Minutes')),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                                  initialValue: selReason,
+                  initialValue: selReason,
                   items: ['Timer', 'Quick 5', 'Reading Quran', 'In congregation', 'Other']
                       .map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
                   onChanged: (v) => setState2(() => selReason = v ?? selReason),
@@ -1456,7 +1385,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$name: $adjustMinutes min')));
     }
   }
-
 
   Future<void> _showHabitEditorDialog({HabitItem? existing}) async {
     final max = _premiumUnlocked ? 100 : 5;
@@ -1609,8 +1537,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       widget.onLocaleChanged(Locale(selected));
     }
   }
-
-  Widget _home() {
+    Widget _home() {
     return FutureBuilder<PrayerData>(
       future: _prayerFuture,
       builder: (context, snap) {
@@ -1838,7 +1765,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
   }
 
   Widget _tasbih() {
-    final visible = _premiumUnlocked ? _tasbihs : (_tasbihs.isNotEmpty ? [_tasbihs.first] : <TasbihCounter>[]); // free users see only the first tasbih
+    final visible = _premiumUnlocked ? _tasbihs : (_tasbihs.isNotEmpty ? [_tasbihs.first] : <TasbihCounter>[]);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -1861,7 +1788,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
               children: [
                 Text(AppStrings.text(context, 'dhikr_label'), style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 10),
-                // Show selected tasbih prominently (free users see only one)
                 Builder(builder: (ctx) {
                   final selected = _tasbihs.firstWhere((t) => t.id == (_selectedTasbihId ?? (_tasbihs.isNotEmpty ? _tasbihs.first.id : '')), orElse: () => _tasbihs.isNotEmpty ? _tasbihs.first : TasbihCounter(id: '0', name: AppStrings.text(ctx, 'dhikr_label'), count: 0, target: 33));
                   return Column(
@@ -1910,7 +1836,7 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                                   _prefs.setString('selected_tasbih', counter.id);
                                 });
                               } else {
-                                if (isSelected) return; // already selected
+                                if (isSelected) return;
                                 _showPremiumDialog();
                               }
                             },
@@ -2020,7 +1946,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       builder: (context, snap) {
         final data = snap.data ?? PrayerData.fallback();
         final engOrder = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-        // build entries with english key, localized label and time; sort by 24h time
         final entries = engOrder.map((eng) {
           final localized = AppStrings.text(context, eng.toLowerCase());
           final t = _customTimes[eng] ?? data.times[eng] ?? '00:00';
@@ -2105,7 +2030,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
           ),
         );
 
-        // Prayer menu: show main cards which open nested section pages
         final sections = [
           {
             'title': widget.locale.languageCode == 'en' ? 'Prayer times' : 'Время намаза',
@@ -2188,18 +2112,10 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                     final title = s['title'] as String;
                     final subs = List<String>.from(s['subs'] as List);
                     final changed = await Navigator.push(context, MaterialPageRoute(builder: (_) => pm.PrayerSectionPage(title: title, submenus: subs, locale: widget.locale)));
-                    // Always attempt to refresh custom times and reschedule after returning from the section page.
-                    // Child pages (Edit intervals) return `true` when they intentionally changed times, but other
-                    // interactions (Apply suggestions) may modify prefs without returning true — so refresh unconditionally.
                     try {
-                      // reload any custom times saved by child pages
                       _customTimes = _readCustomTimesFromPrefs();
-
-                      // reload analytics-related data from SharedPreferences so Charts/Records update
                       try {
                         final prefs = await SharedPreferences.getInstance();
-
-                        // prayer_history -> Map<String,int>
                         try {
                           final hist = prefs.getString('prayer_history');
                           if (hist != null) {
@@ -2207,8 +2123,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                             _prayerHistory = m.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
                           }
                         } catch (_) {}
-
-                        // time_spent -> Map<String,int>
                         try {
                           final t = prefs.getString('time_spent');
                           if (t != null) {
@@ -2216,8 +2130,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                             _timeSpent = m.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
                           }
                         } catch (_) {}
-
-                        // prayer_records -> Map<String, Map<String, Map<String,dynamic>>>
                         try {
                           final rec = prefs.getString('prayer_records');
                           if (rec != null) {
@@ -2234,21 +2146,16 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
                             });
                           }
                         } catch (_) {}
-
-                        // ensure prayer data is refreshed too
                         _prayerFuture = PrayerData.load();
-
                         if (mounted) setState(() {});
                       } catch (e) {
                         debugPrint('Failed to reload prefs after prayer section: $e');
                       }
-
                       await _rescheduleAllPrayerNotifications();
                     } catch (e) {
                       debugPrint('Failed to refresh after prayer section: $e');
                     }
                   },
-
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -2353,12 +2260,10 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       ],
     );
   }
-
-  Widget _analytics() {
+    Widget _analytics() {
     final totalPrayers = _prayerHistory.values.fold<int>(0, (s, v) => s + v);
     final totalMinutes = _timeSpent.values.fold<int>(0, (s, v) => s + v);
 
-    // Show limited summary for all users; full detailed analytics are premium-only
     final summary = ListView(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
       children: [
@@ -2510,7 +2415,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       );
     }
 
-    // Not premium: show summary plus locked details CTA
     return Column(
       children: [
         Expanded(child: summary),
@@ -2542,14 +2446,12 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     );
   }
 
-
   Widget _buildStackedPrayerChart(int days) {
-    // build stacked bars for last `days` days (most recent first)
     final order = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
     final colors = [Color(0xFF7FB7AE), Color(0xFF91D3C9), Color(0xFF6FA8A0), Color(0xFF4A8C86), Color(0xFF2F6F67)];
 
     final now = DateTime.now();
-    final daysList = List.generate(days, (i) => now.subtract(Duration(days: i))).reversed.toList(); // oldest -> newest
+    final daysList = List.generate(days, (i) => now.subtract(Duration(days: i))).reversed.toList();
 
     final groups = <BarChartGroupData>[];
     final bottomTitles = <String>[];
@@ -2560,7 +2462,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
       final key = '${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}';
       bottomTitles.add('${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}');
       final dayMap = _prayerRecords[key] ?? {};
-      // collect minutes per prayer in order
       final minutes = order.map((p) => (dayMap[p]?['timeMinutes'] as num?)?.toDouble() ?? 0.0).toList();
       double running = 0.0;
       final stackItems = <BarChartRodStackItem>[];
@@ -2571,15 +2472,13 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
         running += m;
       }
       if (running > maxY) maxY = running;
-      // if no stack items, add a tiny invisible bar to keep axis
       final rod = BarChartRodData(toY: running, rodStackItems: stackItems, width: 18);
       groups.add(BarChartGroupData(x: di, barRods: [rod]));
     }
 
-    // adapt bottom labels to available width: show fewer labels on narrow screens
     final labelCount = bottomTitles.length;
     final width = MediaQuery.of(context).size.width;
-    final approxLabelWidth = 56; // approx space per label in pixels
+    final approxLabelWidth = 56;
     final maxLabels = (width / approxLabelWidth).floor().clamp(3, labelCount == 0 ? 3 : labelCount);
     final step = maxLabels > 0 ? (labelCount / maxLabels).ceil() : 1;
 
@@ -2593,7 +2492,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
           bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, getTitlesWidget: (v, meta) {
             final idx = v.toInt();
             if (idx < 0 || idx >= bottomTitles.length) return const SizedBox.shrink();
-            // If too many labels, only show every `step`-th label
             if (labelCount > maxLabels && (idx % step != 0)) return const SizedBox.shrink();
             final label = bottomTitles[idx];
             return SideTitleWidget(
@@ -2619,7 +2517,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     );
   }
 
-  // Return a map of date -> dayMap for the last `days` days (descending)
   Map<String, Map<String, Map<String, dynamic>>> _getRecordsForRange(int days) {
     final out = <String, Map<String, Map<String, dynamic>>>{};
     final now = DateTime.now();
@@ -2882,7 +2779,6 @@ class _ZikrHomePageState extends State<ZikrHomePage> {
     );
   }
 }
-
 class AppStrings {
   static const Map<String, Map<String, String>> _data = {
     'ru': {
@@ -2907,8 +2803,8 @@ class AppStrings {
       'next_prayer': 'Следующий намаз',
       'prayer_schedule': 'Расписание намаза',
       'habit_title': 'Рутины',
-            'add_habit': 'Добавить рутину',
-            'habit_name': 'Название рутины',
+      'add_habit': 'Добавить рутину',
+      'habit_name': 'Название рутины',
       'analytics_title': 'Ваша активность',
       'this_week': 'Эта неделя',
       'avg_daily': 'Среднее за день',
@@ -2942,8 +2838,8 @@ class AppStrings {
       'next_prayer': 'Next prayer',
       'prayer_schedule': 'Prayer schedule',
       'habit_title': 'Routines',
-            'add_habit': 'Add routine',
-            'habit_name': 'Routine name',
+      'add_habit': 'Add routine',
+      'habit_name': 'Routine name',
       'analytics_title': 'Your activity',
       'this_week': 'This week',
       'avg_daily': 'Average per day',
