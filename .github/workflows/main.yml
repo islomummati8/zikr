@@ -1,0 +1,38 @@
+name: Build Android AppBundle
+
+on:
+  push:
+    branches: [ "main" ] # yoki sizda branch nomi "master" bo'lsa, master deb o'zgartiring
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x' # yoki o'zingiz ishlatayotgan versiya
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build AppBundle
+        run: flutter build appbundle --release
+
+      - name: Upload AppBundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
